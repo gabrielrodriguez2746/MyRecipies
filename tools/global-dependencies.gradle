@@ -40,4 +40,8 @@ ext {
     mockkVersion = '1.9.2'
     kotlinTestVersion = '3.2.1'
 
+    // Logging
+    timberVersion = '4.7.1'
+
+
 }
