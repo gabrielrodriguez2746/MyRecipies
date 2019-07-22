@@ -2,7 +2,7 @@ package com.myrecipes.di.modules.network;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.myrecipes.data.deserializer.RecipiesWrapperDeserializer;
+import com.myrecipes.data.deserializer.RecipesWrapperDeserializer;
 import com.myrecipes.data.models.RecipesWrapper;
 
 import dagger.Module;
@@ -19,7 +19,7 @@ public class AppNetworkModule {
     @Reusable
     public Gson provideGson() {
         GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapter(RecipesWrapper.class, new RecipiesWrapperDeserializer());
+        builder.registerTypeAdapter(RecipesWrapper.class, new RecipesWrapperDeserializer());
         return builder.create();
     }
 }
