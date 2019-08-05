@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">MyRecipies</string>
+    <string name="app_name">My Recipies</string>
+    <string name="app_recipes">My Recipies</string>
 </resources>
