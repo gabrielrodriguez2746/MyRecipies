@@ -13,6 +13,7 @@
             android:layout_height="0dp"
             android:clipToPadding="false"
             android:padding="@dimen/space_small"
+            app:configuration="@{ recyclerConfiguration }"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -20,4 +21,12 @@
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <data>
+
+        <variable
+            name="recyclerConfiguration"
+            type="com.myrecipes.models.RecyclerViewConfiguration" />
+
+    </data>
 </layout>

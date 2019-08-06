@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        app:cardCornerRadius="@dimen/space_small"
+        app:cardElevation="@dimen/card_elevation"
+        tools:layout_height="180dp"
+        tools:parentTag="androidx.cardview.widget.CardView">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/ivMovie"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                tools:src="@drawable/ic_recipe_default"
+                app:image_url="@{ imageUrl }"
+                app:default_drawable="@{ defaultDrawable }"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:background="@color/gray" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvTitle"
+                android:textAllCaps="true"
+                android:background="@color/transparentGray"
+                android:layout_width="0dp"
+                android:textColor="@android:color/white"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/space_small"
+                android:text="@{ title }"
+                android:textSize="@dimen/font_large"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:text="Nutella Pie" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <data>
+
+        <variable
+            name="title"
+            type="String" />
+
+        <variable
+            name="imageUrl"
+            type="String" />
+
+        <variable
+            name="defaultDrawable"
+            type="android.graphics.drawable.Drawable" />
+
+    </data>
+
+</layout>
