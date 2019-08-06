@@ -3,8 +3,8 @@ package com.myrecipes;
 import android.app.Activity;
 import android.app.Application;
 
-import com.myrecipes.di.modules.component.DaggerMainComponent;
-import com.myrecipes.di.modules.component.MainComponent;
+import com.myrecipes.di.component.DaggerMainComponent;
+import com.myrecipes.di.component.MainComponent;
 
 import javax.inject.Inject;
 
