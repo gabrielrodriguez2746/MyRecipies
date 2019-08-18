@@ -1,8 +1,19 @@
 package com.myrecipes.data.models;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
 import java.util.Objects;
 
+@Entity(tableName = "ingredient")
 public class Ingredient {
+
+    @PrimaryKey(autoGenerate = true)
+    private int id;
+
+    @ColumnInfo(name = "recipe_id")
+    private int recipeId;
 
     private Double quantity;
 
@@ -10,10 +21,19 @@ public class Ingredient {
 
     private String name;
 
-    public Ingredient(Double quantity, String unit, String name) {
+    public Ingredient(int recipeId, Double quantity, String unit, String name) {
+        this.recipeId = recipeId;
         this.quantity = quantity;
         this.unit = unit;
         this.name = name;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public Double getQuantity() {
@@ -26,6 +46,10 @@ public class Ingredient {
 
     public String getName() {
         return name;
+    }
+
+    public int getRecipeId() {
+        return recipeId;
     }
 
     @Override

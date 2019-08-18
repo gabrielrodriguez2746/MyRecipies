@@ -4,11 +4,9 @@ import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.databinding.BindingAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.myrecipes.R;
 import com.myrecipes.models.RecyclerViewConfiguration;
 import com.squareup.picasso.Picasso;
 
@@ -31,7 +29,6 @@ public class GeneralBindings {
         if (imageUrl == null) {
             // TODO Improve this to avoid this default image resolution
             imageView.setImageDrawable(defaultDrawable);
-            imageView.setBackgroundColor(ContextCompat.getColor(imageView.getContext(), R.color.gray));
         } else {
             Picasso.get().load(imageUrl)
                     .into(imageView);

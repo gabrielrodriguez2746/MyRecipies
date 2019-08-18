@@ -11,6 +11,7 @@
         android:foreground="?android:attr/selectableItemBackground"
         app:cardCornerRadius="@dimen/space_small"
         app:cardElevation="@dimen/card_elevation"
+        app:cardPreventCornerOverlap="false"
         tools:layout_height="180dp"
         tools:parentTag="androidx.cardview.widget.CardView">
 
@@ -22,24 +23,24 @@
                 android:id="@+id/ivMovie"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                tools:src="@drawable/ic_recipe_default"
-                app:image_url="@{ imageUrl }"
+                android:scaleType="centerCrop"
                 app:default_drawable="@{ defaultDrawable }"
+                app:image_url="@{ imageUrl }"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:background="@color/gray" />
+                tools:src="@drawable/ic_recipe_default" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/tvTitle"
-                android:textAllCaps="true"
-                android:background="@color/transparentGray"
                 android:layout_width="0dp"
-                android:textColor="@android:color/white"
                 android:layout_height="wrap_content"
+                android:background="@color/transparentGray"
                 android:padding="@dimen/space_small"
                 android:text="@{ title }"
+                android:textAllCaps="true"
+                android:textColor="@android:color/white"
                 android:textSize="@dimen/font_large"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
