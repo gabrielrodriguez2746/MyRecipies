@@ -3,6 +3,7 @@ package com.myrecipes.di.component;
 import com.myrecipes.RecipesApplication;
 import com.myrecipes.di.modules.app.AppActivityBuilder;
 import com.myrecipes.di.modules.app.AppConfigurationModule;
+import com.myrecipes.di.modules.app.AppDataBaseModule;
 import com.myrecipes.di.modules.app.AppModule;
 import com.myrecipes.di.modules.app.FactoryModule;
 import com.myrecipes.di.modules.main.RecipesRepositoryModule;
@@ -19,11 +20,12 @@ import dagger.android.support.AndroidSupportInjectionModule;
 @Singleton
 @Component(modules = {
         AndroidSupportInjectionModule.class,
-        AppConfigurationModule.class,
         ApiModule.class,
         AppActivityBuilder.class,
-        AppNetworkModule.class,
+        AppConfigurationModule.class,
+        AppDataBaseModule.class,
         AppModule.class,
+        AppNetworkModule.class,
         FactoryModule.class,
         RecipesRepositoryModule.class
 })

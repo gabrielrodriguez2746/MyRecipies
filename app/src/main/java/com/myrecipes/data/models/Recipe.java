@@ -1,12 +1,17 @@
 package com.myrecipes.data.models;
 
 import androidx.annotation.Nullable;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
 
 import java.util.List;
 import java.util.Objects;
 
+@Entity(tableName = "recipe")
 public class Recipe {
 
+    @PrimaryKey
     private int id;
 
     private String name;
@@ -14,9 +19,17 @@ public class Recipe {
     @Nullable
     private String image;
 
+    @Ignore
     private List<Ingredient> ingredients;
 
+    @Ignore
     private List<Step> steps;
+
+    public Recipe(int id, String name, @Nullable String image) {
+        this.id = id;
+        this.name = name;
+        this.image = image;
+    }
 
     public Recipe(int id, String name, @Nullable String image, List<Ingredient> ingredients, List<Step> steps) {
         this.id = id;

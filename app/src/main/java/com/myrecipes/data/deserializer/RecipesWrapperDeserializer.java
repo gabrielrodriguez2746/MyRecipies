@@ -43,10 +43,10 @@ public class RecipesWrapperDeserializer implements JsonDeserializer<RecipesWrapp
             return null;
         } else {
             String name = getGenericOrDefault(recipeObject, "name", "");
-            List<Ingredient> ingredients = mapIngredientsFromElement(
+            List<Ingredient> ingredients = mapIngredientsFromElement(id,
                     getGenericOrDefault(recipeObject, "ingredients", new JsonArray())
             );
-            List<Step> steps = mapStepsFromElement(
+            List<Step> steps = mapStepsFromElement(id,
                     getGenericOrDefault(recipeObject, "steps", new JsonArray())
             );
             String nullableImage = getGenericOrDefault(recipeObject, "image", "");
@@ -55,7 +55,7 @@ public class RecipesWrapperDeserializer implements JsonDeserializer<RecipesWrapp
         }
     }
 
-    private List<Ingredient> mapIngredientsFromElement(JsonArray ingredients) {
+    private List<Ingredient> mapIngredientsFromElement(int recipeId, JsonArray ingredients) {
         Timber.d("ingredients object :: %s", ingredients.toString());
         ArrayList<Ingredient> mappedIngredients = new ArrayList<>();
         for (JsonElement ingredient : ingredients) {
@@ -66,13 +66,13 @@ public class RecipesWrapperDeserializer implements JsonDeserializer<RecipesWrapp
             if (quantity != -1.0) {
                 String unit = getGenericOrDefault(ingredientObject, "measure", "");
                 String name = getGenericOrDefault(ingredientObject, "ingredient", "");
-                mappedIngredients.add(new Ingredient(quantity, unit, name));
+                mappedIngredients.add(new Ingredient(recipeId, quantity, unit, name));
             }
         }
         return mappedIngredients;
     }
 
-    private List<Step> mapStepsFromElement(JsonArray steps) {
+    private List<Step> mapStepsFromElement(int recipeId, JsonArray steps) {
         Timber.d("steps object :: %s", steps.toString());
         ArrayList<Step> mappedSteps = new ArrayList<>();
         for (JsonElement step : steps) {
@@ -85,7 +85,7 @@ public class RecipesWrapperDeserializer implements JsonDeserializer<RecipesWrapp
                 String thumbnailVideo = getGenericOrDefault(stepObject, "thumbnailURL", "");
                 String video = !videoURL.isEmpty() ? videoURL :
                         !thumbnailVideo.isEmpty() ? thumbnailVideo : null;
-                mappedSteps.add(new Step(id, shortDescription, description, video));
+                mappedSteps.add(new Step(recipeId, id, shortDescription, description, video));
             }
 
         }
