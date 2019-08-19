@@ -23,6 +23,7 @@
                 android:id="@+id/ivMovie"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
+                android:contentDescription="@string/app_poster_image"
                 android:scaleType="centerCrop"
                 app:default_drawable="@{ defaultDrawable }"
                 app:image_url="@{ imageUrl }"

@@ -1,13 +1,21 @@
 package com.myrecipes.bindings;
 
 import android.graphics.drawable.Drawable;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 import androidx.databinding.BindingAdapter;
+import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.myrecipes.R;
+import com.myrecipes.data.models.Step;
+import com.myrecipes.databinding.ItemStepBinding;
 import com.myrecipes.models.RecyclerViewConfiguration;
+import com.myrecipes.widget.StepWidget;
 import com.squareup.picasso.Picasso;
 
 public class GeneralBindings {
@@ -32,6 +40,24 @@ public class GeneralBindings {
         } else {
             Picasso.get().load(imageUrl)
                     .into(imageView);
+        }
+    }
+
+    // Gabriel Adjust later this, is taking to much responsibility
+    @BindingAdapter("steps")
+    public static void setSteps(ViewGroup parent, StepWidget widget) {
+        if (widget != null && !widget.getSteps().isEmpty()) {
+            parent.setVisibility(View.VISIBLE);
+            LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
+            for (Step step : widget.getSteps()) {
+                ItemStepBinding binding = DataBindingUtil.inflate(layoutInflater, R.layout.item_step, parent, false);
+                binding.setName(step.getShortDescription());
+                View rootView = binding.getRoot();
+                rootView.setOnClickListener(v -> widget.getListener().onItemClicked(step.getId()));
+                parent.addView(rootView);
+            }
+        } else {
+            parent.setVisibility(View.GONE);
         }
     }
 }

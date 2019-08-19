@@ -66,4 +66,15 @@ public class Ingredient {
     public int hashCode() {
         return Objects.hash(quantity, unit, name);
     }
+
+    @Override
+    public String toString() {
+        return "Ingredient{" +
+                "id=" + id +
+                ", recipeId=" + recipeId +
+                ", quantity=" + quantity +
+                ", unit='" + unit + '\'' +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }

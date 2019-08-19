@@ -1,4 +1,10 @@
 <resources>
-    <string name="app_name">My Recipies</string>
-    <string name="app_recipes">My Recipies</string>
+    <string name="app_name">My Recipes</string>
+    <string name="app_recipes">My Recipes</string>
+    <string name="app_poster_image">Poster Image</string>
+    <string name="app_ingredients">Ingredients</string>
+    <string name="app_ingredients_format">%1$s. %2$.2f %3$s.</string>
+
+    <string name="app_copy_bullet">\u2022</string>
+    <string name="app_steps">Steps</string>
 </resources>

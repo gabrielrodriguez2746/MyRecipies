@@ -24,7 +24,6 @@ public class RecipesWrapperDeserializer implements JsonDeserializer<RecipesWrapp
 
     @Override
     public RecipesWrapper deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-        Timber.d("response object :: %s", json.toString());
         JsonArray recipes = json.getAsJsonArray();
         ArrayList<Recipe> mappedRecipes = new ArrayList<>();
         for (JsonElement recipe : recipes) {
@@ -37,7 +36,6 @@ public class RecipesWrapperDeserializer implements JsonDeserializer<RecipesWrapp
     }
 
     private Recipe mapRecipeItemFromElement(JsonObject recipeObject) {
-        Timber.d("recipe object :: %s", recipeObject.toString());
         int id = getGenericOrDefault(recipeObject, "id", new LazilyParsedNumber("-1")).intValue();
         if (id == -1) {
             return null;
@@ -51,12 +49,13 @@ public class RecipesWrapperDeserializer implements JsonDeserializer<RecipesWrapp
             );
             String nullableImage = getGenericOrDefault(recipeObject, "image", "");
             String image = !nullableImage.isEmpty() ? nullableImage : null;
-            return new Recipe(id, name, image, ingredients, steps);
+            Recipe recipe = new Recipe(id, name, image, ingredients, steps);
+            Timber.d("Mapped recipe :: %s", recipe);
+            return recipe;
         }
     }
 
     private List<Ingredient> mapIngredientsFromElement(int recipeId, JsonArray ingredients) {
-        Timber.d("ingredients object :: %s", ingredients.toString());
         ArrayList<Ingredient> mappedIngredients = new ArrayList<>();
         for (JsonElement ingredient : ingredients) {
             JsonObject ingredientObject = ingredient.getAsJsonObject();
@@ -69,11 +68,11 @@ public class RecipesWrapperDeserializer implements JsonDeserializer<RecipesWrapp
                 mappedIngredients.add(new Ingredient(recipeId, quantity, unit, name));
             }
         }
+        Timber.d("Mapped ingredients :: %s", ingredients);
         return mappedIngredients;
     }
 
     private List<Step> mapStepsFromElement(int recipeId, JsonArray steps) {
-        Timber.d("steps object :: %s", steps.toString());
         ArrayList<Step> mappedSteps = new ArrayList<>();
         for (JsonElement step : steps) {
             JsonObject stepObject = step.getAsJsonObject();
@@ -89,6 +88,7 @@ public class RecipesWrapperDeserializer implements JsonDeserializer<RecipesWrapp
             }
 
         }
+        Timber.d("Mapped steps :: %s", steps);
         return mappedSteps;
     }
 }
