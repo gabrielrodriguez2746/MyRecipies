@@ -60,6 +60,14 @@ public class Recipe {
         return steps;
     }
 
+    public void setIngredients(List<Ingredient> ingredients) {
+        this.ingredients = ingredients;
+    }
+
+    public void setSteps(List<Step> steps) {
+        this.steps = steps;
+    }
+
     @Override
     public String toString() {
         return "Recipe{" +

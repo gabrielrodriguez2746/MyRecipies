@@ -3,14 +3,18 @@ package com.myrecipes.respositories;
 import com.myrecipes.data.dao.IngredientsDao;
 import com.myrecipes.data.dao.RecipesDao;
 import com.myrecipes.data.dao.StepsDao;
+import com.myrecipes.data.models.Ingredient;
 import com.myrecipes.data.models.Recipe;
 import com.myrecipes.data.models.RecipesWrapper;
+import com.myrecipes.data.models.Step;
 import com.myrecipes.rest.RecipesService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 
@@ -35,14 +39,34 @@ public class MyRecipesRepository implements RecipesRepository {
         return service.getRecipes()
                 .subscribeOn(Schedulers.io())
                 .map(RecipesWrapper::getRecipes)
-                .doOnSuccess(recipes -> {
-                            recipesDao.insert(recipes);
-                            for (Recipe recipe : recipes) {
-                                ingredientsDao.insert(recipe.getIngredients());
-                                stepsDao.insert(recipe.getSteps());
-                            }
-                        }
+                .flatMap(recipes -> saveRecipes(recipes).andThen(Single.just(recipes)));
 
-                );
+    }
+
+    private Completable saveRecipes(List<Recipe> recipes) {
+        return recipesDao.insert(recipes).subscribeOn(Schedulers.io()).andThen(
+                Single.fromCallable(() -> {
+                    ArrayList<Ingredient> ingredients = new ArrayList<>();
+                    ArrayList<Step> steps = new ArrayList<>();
+                    for (Recipe recipe : recipes) {
+                        ingredients.addAll(recipe.getIngredients());
+                        steps.addAll(recipe.getSteps());
+                    }
+                    return new IngredientsAndSteps(ingredients, steps);
+                }).flatMapCompletable(ingredientsAndSteps -> ingredientsDao.insert(ingredientsAndSteps.ingredients)
+                        .subscribeOn(Schedulers.io())
+                        .andThen(stepsDao.insert(ingredientsAndSteps.steps)))
+        );
+    }
+
+    private class IngredientsAndSteps {
+
+        private IngredientsAndSteps(List<Ingredient> ingredients, List<Step> steps) {
+            this.ingredients = ingredients;
+            this.steps = steps;
+        }
+
+        private List<Ingredient> ingredients;
+        private List<Step> steps;
     }
 }

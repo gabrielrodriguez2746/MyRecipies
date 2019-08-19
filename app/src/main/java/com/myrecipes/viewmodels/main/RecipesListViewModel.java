@@ -42,6 +42,12 @@ public class RecipesListViewModel extends ViewModel implements LifecycleObserver
         );
     }
 
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        compositeDisposable.clear();
+    }
+
     public LiveData<List<Recipe>> getItemsLiveData() {
         return itemsLiveData;
     }
