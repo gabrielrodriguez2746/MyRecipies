@@ -13,6 +13,7 @@ import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,6 +22,7 @@ import com.myrecipes.adapters.RecipesListAdapter;
 import com.myrecipes.data.models.Recipe;
 import com.myrecipes.databinding.FragmentRecipesListBinding;
 import com.myrecipes.decorators.VerticalSpaceItemDecoration;
+import com.myrecipes.listeners.OnFragmentInteraction;
 import com.myrecipes.models.RecyclerViewConfiguration;
 import com.myrecipes.viewmodels.main.RecipesListViewModel;
 
@@ -55,7 +57,13 @@ public class RecipesListFragment extends Fragment implements RecipesListAdapter.
         if (binding == null) {
             DisplayMetrics displayMetrics = getDisplayMetrics();
             adapter = new RecipesListAdapter(displayMetrics, this);
-            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
+            int rowsNumber = Objects.requireNonNull(getContext()).getResources().getInteger(R.integer.app_adapter_rows);
+            RecyclerView.LayoutManager layoutManager;
+            if (rowsNumber > 1) {
+                layoutManager = new LinearLayoutManager(getContext());
+            } else {
+                layoutManager = new GridLayoutManager(getContext(), rowsNumber);
+            }
             binding = DataBindingUtil.inflate(inflater, R.layout.fragment_recipes_list, container, false);
             binding.setRecyclerConfiguration(new RecyclerViewConfiguration(layoutManager, adapter,
                     new VerticalSpaceItemDecoration((getResources().getDimensionPixelSize(R.dimen.space_small)))));
@@ -87,6 +95,7 @@ public class RecipesListFragment extends Fragment implements RecipesListAdapter.
 
     @Override
     public void onRecipeClicked(int recipeId) {
-
+        ((OnFragmentInteraction) Objects.requireNonNull(getActivity()))
+                .onItemClicked(viewModel.getClass().getSimpleName(), String.valueOf(recipeId));
     }
 }

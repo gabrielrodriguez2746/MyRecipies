@@ -11,6 +11,8 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
 
 import com.myrecipes.R;
+import com.myrecipes.fragments.RecipeDetailFragment;
+import com.myrecipes.listeners.OnFragmentInteraction;
 
 import javax.inject.Inject;
 
@@ -19,7 +21,7 @@ import dagger.android.AndroidInjector;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.support.HasSupportFragmentInjector;
 
-public class MainActivity extends AppCompatActivity implements HasSupportFragmentInjector {
+public class MainActivity extends AppCompatActivity implements HasSupportFragmentInjector, OnFragmentInteraction {
 
     @Inject
     DispatchingAndroidInjector<Fragment> dispatchingAndroidInjector;
@@ -45,4 +47,10 @@ public class MainActivity extends AppCompatActivity implements HasSupportFragmen
         return dispatchingAndroidInjector;
     }
 
+    @Override
+    public void onItemClicked(String fragment, String id) {
+        Bundle data = new Bundle();
+        data.putInt(RecipeDetailFragment.RECIPE_ID_KEY, Integer.valueOf(id));
+        navController.navigate(R.id.destination_detail, data);
+    }
 }
