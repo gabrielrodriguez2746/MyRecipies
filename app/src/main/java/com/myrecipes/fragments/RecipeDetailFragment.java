@@ -1,6 +1,7 @@
 package com.myrecipes.fragments;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,20 +10,26 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.myrecipes.R;
+import com.myrecipes.data.models.Ingredient;
 import com.myrecipes.databinding.FragmentRecipeDetailBinding;
+import com.myrecipes.utils.ListUtils;
 import com.myrecipes.viewmodels.detail.RecipeDetailViewModel;
+import com.myrecipes.widget.StepWidget;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
+import timber.log.Timber;
 
 public class RecipeDetailFragment extends Fragment {
 
@@ -30,6 +37,9 @@ public class RecipeDetailFragment extends Fragment {
 
     private FragmentRecipeDetailBinding binding;
     private RecipeDetailViewModel viewModel;
+
+    private Drawable defaultDrawable;
+    private String bulletString;
 
     @Inject
     ViewModelProvider.Factory factory;
@@ -45,6 +55,13 @@ public class RecipeDetailFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (binding == null) {
             binding = DataBindingUtil.inflate(inflater, R.layout.fragment_recipe_detail, container, false);
+        }
+        if (defaultDrawable == null) {
+            defaultDrawable = ContextCompat.getDrawable(binding.getRoot().getContext(), R.drawable.ic_recipe_default);
+            binding.setDefaultDrawable(defaultDrawable);
+        }
+        if (bulletString == null) {
+            bulletString = getString(R.string.app_copy_bullet);
         }
         return binding != null ? binding.getRoot() : super.onCreateView(inflater, container, savedInstanceState);
     }
@@ -67,13 +84,27 @@ public class RecipeDetailFragment extends Fragment {
 
     private void processRecipeSteps() {
         viewModel.getStepsLiveData().observe(getViewLifecycleOwner(), steps -> {
-
+            if (steps != null) {
+                binding.setSteps(new StepWidget(steps, id ->
+                        // Gabriel This should be made by activity
+                        watchYoutubeVideo(Objects.requireNonNull(getContext()), id)));
+            }
         });
+    }
+
+    private void watchYoutubeVideo(Context requireNonNull, int id) {
     }
 
     private void processRecipeIngredients() {
         viewModel.getIngredientsLiveData().observe(getViewLifecycleOwner(), ingredients -> {
-
+            if (ingredients != null) {
+                ArrayList<String> mappedIngredients = new ArrayList<>();
+                for (Ingredient ingredient : ingredients) {
+                    mappedIngredients.add(getString(R.string.app_ingredients_format, ingredient.getName(),
+                            ingredient.getQuantity(), ingredient.getUnit()));
+                }
+                binding.setIngredients(ListUtils.mapToListedString(mappedIngredients, bulletString));
+            }
         });
     }
 
@@ -81,6 +112,7 @@ public class RecipeDetailFragment extends Fragment {
         viewModel.getRecipeLiveData().observe(getViewLifecycleOwner(), recipe -> {
             if (recipe != null) {
                 adjustToolbarTitle(recipe.getName());
+                binding.setImageUrl(recipe.getImage());
             }
         });
     }

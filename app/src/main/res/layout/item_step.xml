@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableStart="@drawable/ic_video"
+        android:text="@{ name }"
+        android:drawablePadding="@dimen/space_small"
+        android:foreground="?android:attr/selectableItemBackgroundBorderless"
+        android:gravity="center_vertical"
+        android:padding="@dimen/space_small"
+        tools:targetApi="m"
+        tools:text="Recipe Introduction" />
+
+    <data>
+
+        <variable
+            name="name"
+            type="String" />
+
+    </data>
+
+</layout>

@@ -31,7 +31,7 @@ public class RecipesListAdapter extends ListAdapter<Recipe, RecipesListAdapter.M
     public RecipesListAdapter(DisplayMetrics displayMetrics, OnRecipeClicked listener) {
         super(diffResolver);
         this.listener = listener;
-        int height = (int) (Math.max(displayMetrics.heightPixels, displayMetrics.widthPixels) * 0.33);
+        int height = (int) (Math.max(displayMetrics.heightPixels, displayMetrics.widthPixels) * 0.25);
         defaultLayoutParameters = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
     }
 

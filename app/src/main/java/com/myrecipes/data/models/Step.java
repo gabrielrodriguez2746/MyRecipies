@@ -10,10 +10,13 @@ import java.util.Objects;
 @Entity(tableName = "step")
 public class Step {
 
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "primary_key")
+    private int primaryKey;
+
     @ColumnInfo(name = "recipe_id")
     private int recipeId;
 
-    @PrimaryKey
     private int id;
 
     @ColumnInfo(name = "short_description")
@@ -30,6 +33,14 @@ public class Step {
         this.shortDescription = shortDescription;
         this.description = description;
         this.video = video;
+    }
+
+    public int getPrimaryKey() {
+        return primaryKey;
+    }
+
+    public void setPrimaryKey(int primaryKey) {
+        this.primaryKey = primaryKey;
     }
 
     public int getRecipeId() {
@@ -67,5 +78,16 @@ public class Step {
     @Override
     public int hashCode() {
         return Objects.hash(id, shortDescription, description, video);
+    }
+
+    @Override
+    public String toString() {
+        return "Step{" +
+                "recipeId=" + recipeId +
+                ", id=" + id +
+                ", shortDescription='" + shortDescription + '\'' +
+                ", description='" + description + '\'' +
+                ", video='" + video + '\'' +
+                '}';
     }
 }
