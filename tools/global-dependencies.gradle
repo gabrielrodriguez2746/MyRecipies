@@ -43,5 +43,8 @@ ext {
     // Logging
     timberVersion = '4.7.1'
 
+    // ExoPlayer
+    exoPlayer = '2.7.3'
+    jSoup = '1.11.3'
 
 }

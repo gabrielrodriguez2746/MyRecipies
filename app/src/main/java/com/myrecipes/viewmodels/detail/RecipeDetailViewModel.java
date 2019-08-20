@@ -44,7 +44,7 @@ public class RecipeDetailViewModel extends ViewModel {
         compositeDisposable.add(getAllRecipeDataZip(id)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                        movie -> {
+                        recipe -> {
                         }, // Gabriel Improve this
                         Throwable::printStackTrace) // Gabriel Notify
         );
@@ -82,11 +82,11 @@ public class RecipeDetailViewModel extends ViewModel {
                 });
     }
 
-    private Single<Recipe> getAllRecipeDataZip(int movieId) {
+    private Single<Recipe> getAllRecipeDataZip(int recipeId) {
         return Single.zip(
-                getRecipeStepsSingle(movieId),
-                getRecipeIngredientsSingle(movieId),
-                getSingleRecipe(movieId), (steps, ingredients, recipe) -> {
+                getRecipeStepsSingle(recipeId),
+                getRecipeIngredientsSingle(recipeId),
+                getSingleRecipe(recipeId), (steps, ingredients, recipe) -> {
                     recipe.setIngredients(ingredients);
                     recipe.setSteps(steps);
                     return recipe;

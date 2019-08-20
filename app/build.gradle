@@ -66,5 +66,9 @@ dependencies {
     // Logging
     implementation "com.jakewharton.timber:timber:$rootProject.ext.timberVersion"
 
+    // ExoPlayer
+    implementation "com.google.android.exoplayer:exoplayer:$rootProject.ext.exoPlayer"
+    implementation "org.jsoup:jsoup:$rootProject.ext.jSoup"
+
 
 }

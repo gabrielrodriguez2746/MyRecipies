@@ -21,4 +21,7 @@ public abstract class StepsDao {
     @Query("SELECT * FROM step WHERE recipe_id = :recipeId")
     public abstract Single<List<Step>> getStepsByRecipeId(int recipeId);
 
+    @Query("SELECT * FROM step WHERE recipe_id = :recipeId AND id = :stepId")
+    public abstract Single<Step> getStepByRecipeId(int recipeId, int stepId);
+
 }

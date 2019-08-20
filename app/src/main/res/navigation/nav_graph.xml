@@ -21,4 +21,18 @@
             app:argType="integer" />
     </fragment>
 
+    <fragment
+        android:id="@+id/destination_player"
+        android:name="com.myrecipes.fragments.StepVideoPlayerFragment"
+        android:label="">
+        <argument
+            android:name="recipe_id"
+            android:defaultValue="-1"
+            app:argType="integer" />
+        <argument
+            android:name="step_id"
+            android:defaultValue="-1"
+            app:argType="integer" />
+    </fragment>
+
 </navigation>

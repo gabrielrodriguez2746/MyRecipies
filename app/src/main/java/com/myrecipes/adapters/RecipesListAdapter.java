@@ -88,6 +88,6 @@ public class RecipesListAdapter extends ListAdapter<Recipe, RecipesListAdapter.M
 
     public interface OnRecipeClicked {
 
-        void onRecipeClicked(int movieId);
+        void onRecipeClicked(int recipeId);
     }
 }
