@@ -15,6 +15,6 @@ public abstract class RecipeDetailViewModelModule {
     @Binds
     @IntoMap
     @ViewModelKey(RecipeDetailViewModel.class)
-    public abstract ViewModel bindPopularMoviesDetailViewModel(RecipeDetailViewModel viewModel);
+    public abstract ViewModel bindRecipeDetailViewModel(RecipeDetailViewModel viewModel);
 
 }

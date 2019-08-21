@@ -19,6 +19,7 @@ import androidx.lifecycle.ViewModelProviders;
 import com.myrecipes.R;
 import com.myrecipes.data.models.Ingredient;
 import com.myrecipes.databinding.FragmentRecipeDetailBinding;
+import com.myrecipes.listeners.OnDetailFragmentInteraction;
 import com.myrecipes.utils.ListUtils;
 import com.myrecipes.viewmodels.detail.RecipeDetailViewModel;
 import com.myrecipes.widget.StepWidget;
@@ -29,7 +30,6 @@ import java.util.Objects;
 import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
-import timber.log.Timber;
 
 public class RecipeDetailFragment extends Fragment {
 
@@ -40,6 +40,7 @@ public class RecipeDetailFragment extends Fragment {
 
     private Drawable defaultDrawable;
     private String bulletString;
+    private int recipeId;
 
     @Inject
     ViewModelProvider.Factory factory;
@@ -78,21 +79,23 @@ public class RecipeDetailFragment extends Fragment {
         processRecipeSteps();
 
         if (arguments.containsKey(RECIPE_ID_KEY)) {
-            viewModel.getRecipeInformationById(arguments.getInt(RECIPE_ID_KEY));
+            recipeId = arguments.getInt(RECIPE_ID_KEY);
+            viewModel.getRecipeInformationById(recipeId);
         }
     }
 
     private void processRecipeSteps() {
         viewModel.getStepsLiveData().observe(getViewLifecycleOwner(), steps -> {
             if (steps != null) {
-                binding.setSteps(new StepWidget(steps, id ->
-                        // Gabriel This should be made by activity
-                        watchYoutubeVideo(Objects.requireNonNull(getContext()), id)));
+                // Gabriel This should be made by activity
+                binding.setSteps(new StepWidget(steps, this::onRecipeStepClicked));
             }
         });
     }
 
-    private void watchYoutubeVideo(Context requireNonNull, int id) {
+    private void onRecipeStepClicked(int stepId) {
+        ((OnDetailFragmentInteraction) Objects.requireNonNull(getActivity()))
+                .onStepClicked(String.valueOf(recipeId), String.valueOf(stepId));
     }
 
     private void processRecipeIngredients() {

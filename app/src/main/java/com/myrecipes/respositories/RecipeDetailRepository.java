@@ -15,4 +15,6 @@ public interface RecipeDetailRepository {
     Single<List<Step>> getStepsByRecipeId(int id);
 
     Single<List<Ingredient>> getIngredientsByRecipeId(int id);
+
+    Single<Step> getStepByRecipeId(int recipeId, int stepId);
 }
