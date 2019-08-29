@@ -24,7 +24,7 @@ public class LogsInterceptor implements Interceptor {
         );
         HttpLoggingInterceptor.Level level = HttpLoggingInterceptor.Level.NONE;
         if (BuildConfig.DEBUG) {
-            level = HttpLoggingInterceptor.Level.BODY;
+            level = HttpLoggingInterceptor.Level.BASIC;
         }
         loggingInterceptor.setLevel(level);
         return loggingInterceptor.intercept(chain);

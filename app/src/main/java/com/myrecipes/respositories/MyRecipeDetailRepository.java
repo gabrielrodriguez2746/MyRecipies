@@ -48,6 +48,6 @@ public class MyRecipeDetailRepository implements RecipeDetailRepository {
     @Override
     public Single<Step> getStepByRecipeId(int recipeId, int stepId) {
         return stepsDao.getStepByRecipeId(recipeId, stepId)
-                .subscribeOn(Schedulers.computation());
+                .subscribeOn(Schedulers.io());
     }
 }

@@ -9,5 +9,5 @@ public final class VideoPlayerConfig {
     public static final int MIN_PLAYBACK_START_BUFFER = 1500;
     //Min video You want to buffer when user resumes video
     public static final int MIN_PLAYBACK_RESUME_BUFFER = 5000;
-
 }
+

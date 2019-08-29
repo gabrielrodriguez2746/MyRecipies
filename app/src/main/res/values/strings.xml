@@ -7,4 +7,7 @@
 
     <string name="app_copy_bullet">\u2022</string>
     <string name="app_steps">Steps</string>
+    <string name="app_steps_format">%1d. %2$s</string>
+    <string name="app_not_video">(Video not available)</string>
+    <string name="app_not_video_information">There is no video for this step</string>
 </resources>

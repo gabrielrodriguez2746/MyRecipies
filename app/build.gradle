@@ -69,6 +69,7 @@ dependencies {
     // ExoPlayer
     implementation "com.google.android.exoplayer:exoplayer:$rootProject.ext.exoPlayer"
     implementation "org.jsoup:jsoup:$rootProject.ext.jSoup"
+    implementation "com.android.support:support-media-compat:$rootProject.ext.mediaCompat"
 
 
 }
