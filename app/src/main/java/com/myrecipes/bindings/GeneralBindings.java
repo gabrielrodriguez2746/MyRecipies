@@ -1,5 +1,6 @@
 package com.myrecipes.bindings;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,12 +49,17 @@ public class GeneralBindings {
     public static void setSteps(ViewGroup parent, StepWidget widget) {
         if (widget != null && !widget.getSteps().isEmpty()) {
             parent.setVisibility(View.VISIBLE);
-            LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
+            parent.removeAllViews();
+            Context context = parent.getContext();
+            LayoutInflater layoutInflater = LayoutInflater.from(context);
             for (Step step : widget.getSteps()) {
                 ItemStepBinding binding = DataBindingUtil.inflate(layoutInflater, R.layout.item_step, parent, false);
-                binding.setName(step.getShortDescription());
+                String name = context.getString(R.string.app_steps_format, step.getIndex() + 1,
+                        step.getShortDescription());
+                boolean hasVideo = step.getVideo() != null;
+                binding.setName(hasVideo ? name : name + " " + context.getString(R.string.app_not_video));
                 View rootView = binding.getRoot();
-                rootView.setOnClickListener(v -> widget.getListener().onItemClicked(step.getId()));
+                rootView.setOnClickListener(v -> widget.getListener().onItemClicked(step.getId(), hasVideo));
                 parent.addView(rootView);
             }
         } else {

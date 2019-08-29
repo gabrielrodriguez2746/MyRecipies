@@ -18,7 +18,7 @@ public abstract class IngredientsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     public abstract Completable insert(List<Ingredient> ingredients);
 
-    @Query("SELECT * FROM ingredient WHERE recipe_id = :recipeId")
+    @Query("SELECT * FROM ingredient WHERE recipe_id = :recipeId ORDER BY `index` ASC")
     public abstract Single<List<Ingredient>> getIngredientsByRecipeId(int recipeId);
 
 }

@@ -45,6 +45,7 @@ ext {
 
     // ExoPlayer
     exoPlayer = '2.7.3'
+    mediaCompat = '28.0.0'
     jSoup = '1.11.3'
 
 }

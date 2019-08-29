@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -38,6 +39,7 @@ public class RecipeDetailFragment extends Fragment {
     private FragmentRecipeDetailBinding binding;
     private RecipeDetailViewModel viewModel;
 
+    private Toast toast = null;
     private Drawable defaultDrawable;
     private String bulletString;
     private int recipeId;
@@ -93,9 +95,16 @@ public class RecipeDetailFragment extends Fragment {
         });
     }
 
-    private void onRecipeStepClicked(int stepId) {
-        ((OnDetailFragmentInteraction) Objects.requireNonNull(getActivity()))
-                .onStepClicked(String.valueOf(recipeId), String.valueOf(stepId));
+    private void onRecipeStepClicked(int stepId, boolean hasVideo) {
+        if (hasVideo) {
+            ((OnDetailFragmentInteraction) Objects.requireNonNull(getActivity()))
+                    .onStepClicked(String.valueOf(recipeId), String.valueOf(stepId));
+        } else {
+            if (toast != null) toast.cancel();
+            toast = Toast.makeText(getContext(), getString(R.string.app_not_video_information), Toast.LENGTH_SHORT);
+            toast.show();
+        }
+
     }
 
     private void processRecipeIngredients() {

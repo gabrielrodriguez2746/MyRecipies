@@ -3,6 +3,8 @@ package com.myrecipes.fragments;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,13 +20,16 @@ import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.LoadControl;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DataSource;
@@ -35,6 +40,7 @@ import com.google.android.exoplayer2.util.Util;
 import com.myrecipes.R;
 import com.myrecipes.data.models.Step;
 import com.myrecipes.databinding.FragmentVideoPlayerBinding;
+import com.myrecipes.helpers.MyExoPlayerEventListener;
 import com.myrecipes.utils.VideoPlayerConfig;
 import com.myrecipes.viewmodels.media.RecipeStepViewModel;
 
@@ -45,6 +51,7 @@ import java.util.Objects;
 import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
+import timber.log.Timber;
 
 public class StepVideoPlayerFragment extends Fragment {
 
@@ -55,6 +62,8 @@ public class StepVideoPlayerFragment extends Fragment {
     private RecipeStepViewModel viewModel;
 
     private SimpleExoPlayer player;
+    private MediaSessionCompat mediaSession;
+    private PlaybackStateCompat.Builder stateBuilder;
     private int recipeId;
 
     @Inject
@@ -73,6 +82,7 @@ public class StepVideoPlayerFragment extends Fragment {
             binding = DataBindingUtil.inflate(inflater, R.layout.fragment_video_player, container, false);
             if (player == null) {
                 setupPlayer();
+                initializeMediaSession();
             }
         }
         return binding != null ? binding.getRoot() : super.onCreateView(inflater, container, savedInstanceState);
@@ -87,7 +97,7 @@ public class StepVideoPlayerFragment extends Fragment {
             viewModel = ViewModelProviders.of(this, factory).get(RecipeStepViewModel.class);
         }
         processSteps();
-//        processSelectedStep();
+        processSelectedStep();
 
         if (arguments.containsKey(RECIPE_ID_KEY)) {
             recipeId = arguments.getInt(RECIPE_ID_KEY);
@@ -98,12 +108,17 @@ public class StepVideoPlayerFragment extends Fragment {
         }
     }
 
+    private void processSelectedStep() {
+        viewModel.getStepLiveData().observe(getViewLifecycleOwner(), step -> {
+            binding.setDescription(step.getDescription());
+            player.seekTo(step.getIndex(), 0);
+        });
+    }
+
     private void processSteps() {
         viewModel.getStepsLiveData().observe(getViewLifecycleOwner(), steps -> {
             if (steps != null) {
                 buildMediaSource(steps);
-                // Gabriel This should be made by activity
-//                binding.setSteps(new StepWidget(steps, this::onRecipeStepClicked));
             }
         });
     }
@@ -122,6 +137,25 @@ public class StepVideoPlayerFragment extends Fragment {
                 new DefaultTrackSelector(videoTrackSelectionFactory);
         player = ExoPlayerFactory.newSimpleInstance(new DefaultRenderersFactory(
                 binding.getRoot().getContext()), trackSelector, loadControl);
+        player.addListener(new MyExoPlayerEventListener() {
+
+            @Override
+            public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+                Timber.tag("Gabriel ").d("onTracksChanged. Index :: %s", player.getCurrentWindowIndex());
+                viewModel.getRecipeStepInformation(recipeId, player.getCurrentWindowIndex());
+            }
+
+            @Override
+            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                if ((playbackState == Player.STATE_READY) && playWhenReady) {
+                    stateBuilder.setState(PlaybackStateCompat.STATE_PLAYING,
+                            player.getCurrentPosition(), 1f);
+                } else if ((playbackState == Player.STATE_READY)) {
+                    stateBuilder.setState(PlaybackStateCompat.STATE_PAUSED,
+                            player.getCurrentPosition(), 1f);
+                }
+            }
+        });
         binding.pvRecipe.setPlayer(player);
     }
 
@@ -133,9 +167,10 @@ public class StepVideoPlayerFragment extends Fragment {
         ArrayList<MediaSource> sources = new ArrayList<>();
 
         for (Step videoStep : videoSteps) {
-            if (videoStep.getVideo() != null) {
+            String video = videoStep.getVideo();
+            if (video != null) {
                 sources.add(new ExtractorMediaSource.Factory(dataSourceFactory)
-                        .createMediaSource(Uri.parse(videoStep.getVideo())));
+                        .createMediaSource(Uri.parse(video)));
             }
         }
 
@@ -146,6 +181,37 @@ public class StepVideoPlayerFragment extends Fragment {
 
         player.prepare(concatenatingMediaSource);
         player.setPlayWhenReady(true);
+    }
+
+
+    private void initializeMediaSession() {
+
+        mediaSession = new MediaSessionCompat(Objects.requireNonNull(getContext()),
+                StepVideoPlayerFragment.class.getSimpleName());
+
+        mediaSession.setFlags(
+                MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
+                        MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+
+        mediaSession.setMediaButtonReceiver(null);
+
+        // Set an initial PlaybackState with ACTION_PLAY, so media buttons can start the player.
+        stateBuilder = new PlaybackStateCompat.Builder()
+                .setActions(
+                        PlaybackStateCompat.ACTION_PLAY |
+                                PlaybackStateCompat.ACTION_PAUSE |
+                                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
+                                PlaybackStateCompat.ACTION_PLAY_PAUSE);
+
+        mediaSession.setPlaybackState(stateBuilder.build());
+
+
+        // MySessionCallback has methods that handle callbacks from a media controller.
+        mediaSession.setCallback(new MySessionCallback());
+
+        // Start the Media Session since the activity is active.
+        mediaSession.setActive(true);
+
     }
 
     private void releasePlayer() {
@@ -185,6 +251,24 @@ public class StepVideoPlayerFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         releasePlayer();
+        mediaSession.setActive(false);
+    }
+
+    private class MySessionCallback extends MediaSessionCompat.Callback {
+        @Override
+        public void onPlay() {
+            player.setPlayWhenReady(true);
+        }
+
+        @Override
+        public void onPause() {
+            player.setPlayWhenReady(false);
+        }
+
+        @Override
+        public void onSkipToPrevious() {
+            player.seekTo(0);
+        }
     }
 
 }

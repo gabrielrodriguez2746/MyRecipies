@@ -18,7 +18,7 @@ public abstract class StepsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     public abstract Completable insert(List<Step> steps);
 
-    @Query("SELECT * FROM step WHERE recipe_id = :recipeId")
+    @Query("SELECT * FROM step WHERE recipe_id = :recipeId ORDER BY `index` ASC")
     public abstract Single<List<Step>> getStepsByRecipeId(int recipeId);
 
     @Query("SELECT * FROM step WHERE recipe_id = :recipeId AND id = :stepId")

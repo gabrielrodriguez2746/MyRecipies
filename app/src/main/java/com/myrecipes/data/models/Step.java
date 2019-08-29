@@ -10,37 +10,44 @@ import java.util.Objects;
 @Entity(tableName = "step")
 public class Step {
 
-    @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "primary_key")
-    private int primaryKey;
-
     @ColumnInfo(name = "recipe_id")
     private int recipeId;
 
     private int id;
+
+    @PrimaryKey
+    private int customId;
 
     @ColumnInfo(name = "short_description")
     private String shortDescription;
 
     private String description;
 
+    private int index;
+
     @Nullable
     private String video;
 
-    public Step(int recipeId, int id, String shortDescription, String description, @Nullable String video) {
+    public Step(int index, int recipeId, int id, String shortDescription, String description, @Nullable String video) {
+        this.index = index;
         this.recipeId = recipeId;
         this.id = id;
         this.shortDescription = shortDescription;
         this.description = description;
         this.video = video;
+        this.customId = recipeId + id + shortDescription.hashCode();
     }
 
-    public int getPrimaryKey() {
-        return primaryKey;
+    public void setCustomId(int customId) {
+        this.customId = customId;
     }
 
-    public void setPrimaryKey(int primaryKey) {
-        this.primaryKey = primaryKey;
+    public int getIndex() {
+        return index;
+    }
+
+    public int getCustomId() {
+        return customId;
     }
 
     public int getRecipeId() {
@@ -67,27 +74,19 @@ public class Step {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof Step)) return false;
         Step step = (Step) o;
-        return id == step.id &&
-                Objects.equals(shortDescription, step.shortDescription) &&
-                Objects.equals(description, step.description) &&
-                Objects.equals(video, step.video);
+        return recipeId == step.recipeId &&
+                id == step.id &&
+                customId == step.customId &&
+                index == step.index &&
+                shortDescription.equals(step.shortDescription) &&
+                description.equals(step.description) &&
+                video.equals(step.video);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, shortDescription, description, video);
-    }
-
-    @Override
-    public String toString() {
-        return "Step{" +
-                "recipeId=" + recipeId +
-                ", id=" + id +
-                ", shortDescription='" + shortDescription + '\'' +
-                ", description='" + description + '\'' +
-                ", video='" + video + '\'' +
-                '}';
+        return Objects.hash(recipeId, id, customId, shortDescription, description, index, video);
     }
 }
