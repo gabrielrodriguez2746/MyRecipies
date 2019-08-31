@@ -82,7 +82,7 @@ public class Step {
                 index == step.index &&
                 shortDescription.equals(step.shortDescription) &&
                 description.equals(step.description) &&
-                video.equals(step.video);
+                Objects.equals(video, step.video);
     }
 
     @Override
