@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements HasSupportFragmen
     public void onItemClicked(String fragment, String id) {
         Bundle data = new Bundle();
         data.putInt(RecipeDetailFragment.RECIPE_ID_KEY, Integer.valueOf(id));
-        navController.navigate(R.id.destination_detail, data);
+        navController.navigate(R.id.action_fragment_detail, data);
     }
 
     @Override
