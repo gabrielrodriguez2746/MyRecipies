@@ -4,35 +4,17 @@
     android:id="@+id/nav_graph"
     app:startDestination="@+id/destination_recipes">
 
+    <include app:graph="@navigation/second_graph" />
+
     <fragment
         android:id="@+id/destination_recipes"
         android:name="com.myrecipes.fragments.RecipesListFragment"
         android:label="@string/app_recipes">
 
-    </fragment>
+        <action
+            android:id="@+id/action_fragment_detail"
+            app:destination="@id/second_graph" />
 
-    <fragment
-        android:id="@+id/destination_detail"
-        android:name="com.myrecipes.fragments.RecipeDetailFragment"
-        android:label="">
-        <argument
-            android:name="recipe_id"
-            android:defaultValue="-1"
-            app:argType="integer" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/destination_player"
-        android:name="com.myrecipes.fragments.StepVideoPlayerFragment"
-        android:label="">
-        <argument
-            android:name="recipe_id"
-            android:defaultValue="-1"
-            app:argType="integer" />
-        <argument
-            android:name="step_id"
-            android:defaultValue="-1"
-            app:argType="integer" />
     </fragment>
 
 </navigation>

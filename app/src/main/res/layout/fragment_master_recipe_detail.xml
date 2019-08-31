@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/gl_divider"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.38" />
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:fillViewport="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/gl_divider"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/space_small">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tv_ingredients_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="@dimen/space_micro"
+                    android:paddingBottom="@dimen/space_micro"
+                    android:text="@string/app_ingredients"
+                    android:textSize="@dimen/font_large"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tv_ingredients"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@{ ingredients }"
+                    app:layout_constraintEnd_toEndOf="@id/tv_ingredients_title"
+                    app:layout_constraintStart_toStartOf="@id/tv_ingredients_title"
+                    app:layout_constraintTop_toBottomOf="@id/tv_ingredients_title"
+                    tools:text="Something " />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tv_steps_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_small"
+                    android:paddingTop="@dimen/space_micro"
+                    android:paddingBottom="@dimen/space_micro"
+                    android:text="@string/app_steps"
+                    android:textSize="@dimen/font_large"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="@id/tv_ingredients_title"
+                    app:layout_constraintStart_toStartOf="@id/tv_ingredients_title"
+                    app:layout_constraintTop_toBottomOf="@id/tv_ingredients" />
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:id="@+id/ll_steps"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintEnd_toEndOf="@id/tv_ingredients_title"
+                    app:layout_constraintStart_toStartOf="@id/tv_ingredients_title"
+                    app:layout_constraintTop_toBottomOf="@id/tv_steps_title"
+                    app:steps="@{ steps }" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+        <com.google.android.exoplayer2.ui.PlayerView
+            android:id="@+id/pvRecipe"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:controller_layout_id="@layout/exo_playback_control_view"
+            app:layout_constraintBottom_toTopOf="@+id/tv_step_description"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toEndOf="@id/gl_divider"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0"
+            app:player_layout_id="@layout/exo_simple_player_view"
+            app:repeat_toggle_modes="none"
+            app:show_timeout="45000"
+            app:surface_type="texture_view" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_step_description"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:padding="@dimen/space_small"
+            android:text="@{ description }"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_percent="0.25"
+            app:layout_constraintStart_toEndOf="@id/gl_divider"
+            app:layout_constraintTop_toBottomOf="@+id/pvRecipe"
+            tools:text="Something to do" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <data>
+
+        <variable
+            name="description"
+            type="String" />
+
+        <variable
+            name="ingredients"
+            type="String" />
+
+        <variable
+            name="steps"
+            type="com.myrecipes.widget.StepWidget" />
+    </data>
+
+</layout>
