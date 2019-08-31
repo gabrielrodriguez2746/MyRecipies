@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,6 +46,7 @@ import com.myrecipes.utils.VideoPlayerConfig;
 import com.myrecipes.viewmodels.media.RecipeStepViewModel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -65,6 +67,8 @@ public class StepVideoPlayerFragment extends Fragment {
     private MediaSessionCompat mediaSession;
     private PlaybackStateCompat.Builder stateBuilder;
     private int recipeId;
+    private HashMap<String, Integer> mediaIndexMap = new HashMap<>();
+    private SparseIntArray mediaIdIndexMap = new SparseIntArray();
 
     @Inject
     ViewModelProvider.Factory factory;
@@ -79,8 +83,10 @@ public class StepVideoPlayerFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (binding == null) {
+            Timber.tag("Gabriel").d("binding was null");
             binding = DataBindingUtil.inflate(inflater, R.layout.fragment_video_player, container, false);
             if (player == null) {
+                Timber.tag("Gabriel").d("player was null");
                 setupPlayer();
                 initializeMediaSession();
             }
@@ -102,16 +108,22 @@ public class StepVideoPlayerFragment extends Fragment {
         if (arguments.containsKey(RECIPE_ID_KEY)) {
             recipeId = arguments.getInt(RECIPE_ID_KEY);
             viewModel.getStepsByRecipeId(recipeId);
-            if (arguments.containsKey(STEP_ID_KEY)) {
-                viewModel.getRecipeStepInformation(recipeId, arguments.getInt(STEP_ID_KEY));
-            }
         }
     }
 
     private void processSelectedStep() {
         viewModel.getStepLiveData().observe(getViewLifecycleOwner(), step -> {
+            Timber.d("Processing step %s", step.getShortDescription());
             binding.setDescription(step.getDescription());
-            player.seekTo(step.getIndex(), 0);
+            if (mediaIdIndexMap.get(player.getCurrentWindowIndex()) != step.getId()) {
+                String video = step.getVideo();
+                if (mediaIndexMap.containsKey(video)) {
+                    Integer videoIndex = mediaIndexMap.get(video);
+                    if (videoIndex != null) {
+                        player.seekTo(videoIndex, 0);
+                    }
+                }
+            }
         });
     }
 
@@ -119,8 +131,16 @@ public class StepVideoPlayerFragment extends Fragment {
         viewModel.getStepsLiveData().observe(getViewLifecycleOwner(), steps -> {
             if (steps != null) {
                 buildMediaSource(steps);
+                processStepFromExtras();
             }
         });
+    }
+
+    private void processStepFromExtras() {
+        Bundle arguments = Objects.requireNonNull(getArguments());
+        if (arguments.containsKey(STEP_ID_KEY)) {
+            viewModel.getRecipeStepInformation(recipeId, arguments.getInt(STEP_ID_KEY));
+        }
     }
 
     private void setupPlayer() {
@@ -141,8 +161,7 @@ public class StepVideoPlayerFragment extends Fragment {
 
             @Override
             public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-                Timber.tag("Gabriel ").d("onTracksChanged. Index :: %s", player.getCurrentWindowIndex());
-                viewModel.getRecipeStepInformation(recipeId, player.getCurrentWindowIndex());
+                viewModel.getRecipeStepInformation(recipeId, mediaIdIndexMap.get(player.getCurrentWindowIndex()));
             }
 
             @Override
@@ -166,11 +185,15 @@ public class StepVideoPlayerFragment extends Fragment {
 
         ArrayList<MediaSource> sources = new ArrayList<>();
 
+        int notNullIndex = 0;
         for (Step videoStep : videoSteps) {
             String video = videoStep.getVideo();
             if (video != null) {
+                mediaIndexMap.put(video, notNullIndex);
+                mediaIdIndexMap.put(notNullIndex, videoStep.getId());
                 sources.add(new ExtractorMediaSource.Factory(dataSourceFactory)
                         .createMediaSource(Uri.parse(video)));
+                notNullIndex++;
             }
         }
 

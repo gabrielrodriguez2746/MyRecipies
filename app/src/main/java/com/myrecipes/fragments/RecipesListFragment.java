@@ -21,6 +21,7 @@ import com.myrecipes.R;
 import com.myrecipes.adapters.RecipesListAdapter;
 import com.myrecipes.data.models.Recipe;
 import com.myrecipes.databinding.FragmentRecipesListBinding;
+import com.myrecipes.decorators.MediaSpaceDecorator;
 import com.myrecipes.decorators.VerticalSpaceItemDecoration;
 import com.myrecipes.listeners.OnFragmentInteraction;
 import com.myrecipes.models.RecyclerViewConfiguration;
@@ -57,16 +58,19 @@ public class RecipesListFragment extends Fragment implements RecipesListAdapter.
         if (binding == null) {
             DisplayMetrics displayMetrics = getDisplayMetrics();
             adapter = new RecipesListAdapter(displayMetrics, this);
+            binding = DataBindingUtil.inflate(inflater, R.layout.fragment_recipes_list, container, false);
             int rowsNumber = Objects.requireNonNull(getContext()).getResources().getInteger(R.integer.app_adapter_rows);
             RecyclerView.LayoutManager layoutManager;
+            Timber.tag("Gabriel").d("Rows count %s", rowsNumber);
             if (rowsNumber > 1) {
-                layoutManager = new LinearLayoutManager(getContext());
-            } else {
                 layoutManager = new GridLayoutManager(getContext(), rowsNumber);
+                binding.setRecyclerConfiguration(new RecyclerViewConfiguration(layoutManager, adapter,
+                        new MediaSpaceDecorator((getResources().getDimensionPixelSize(R.dimen.space_small)))));
+            } else {
+                layoutManager = new LinearLayoutManager(getContext());
+                binding.setRecyclerConfiguration(new RecyclerViewConfiguration(layoutManager, adapter,
+                        new VerticalSpaceItemDecoration((getResources().getDimensionPixelSize(R.dimen.space_small)))));
             }
-            binding = DataBindingUtil.inflate(inflater, R.layout.fragment_recipes_list, container, false);
-            binding.setRecyclerConfiguration(new RecyclerViewConfiguration(layoutManager, adapter,
-                    new VerticalSpaceItemDecoration((getResources().getDimensionPixelSize(R.dimen.space_small)))));
         }
         return binding != null ? binding.getRoot() : super.onCreateView(inflater, container, savedInstanceState);
     }

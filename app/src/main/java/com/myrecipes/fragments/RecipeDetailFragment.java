@@ -32,6 +32,8 @@ import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
 
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+
 public class RecipeDetailFragment extends Fragment {
 
     public static String RECIPE_ID_KEY = "recipe_id";
@@ -58,13 +60,14 @@ public class RecipeDetailFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (binding == null) {
             binding = DataBindingUtil.inflate(inflater, R.layout.fragment_recipe_detail, container, false);
-        }
-        if (defaultDrawable == null) {
-            defaultDrawable = ContextCompat.getDrawable(binding.getRoot().getContext(), R.drawable.ic_recipe_default);
-            binding.setDefaultDrawable(defaultDrawable);
-        }
-        if (bulletString == null) {
+            if (getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE) {
+                defaultDrawable = ContextCompat.getDrawable(binding.getRoot().getContext(), R.drawable.ic_recipe_vertical);
+            } else {
+                defaultDrawable = ContextCompat.getDrawable(binding.getRoot().getContext(), R.drawable.ic_recipe_default);
+            }
+
             bulletString = getString(R.string.app_copy_bullet);
+            binding.setDefaultDrawable(defaultDrawable);
         }
         return binding != null ? binding.getRoot() : super.onCreateView(inflater, container, savedInstanceState);
     }
