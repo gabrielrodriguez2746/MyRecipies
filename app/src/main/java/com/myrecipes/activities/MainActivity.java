@@ -1,5 +1,6 @@
 package com.myrecipes.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -11,6 +12,7 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
 
 import com.myrecipes.R;
+import com.myrecipes.RecipesIntentService;
 import com.myrecipes.fragments.RecipeDetailFragment;
 import com.myrecipes.fragments.StepVideoPlayerFragment;
 import com.myrecipes.listeners.OnDetailFragmentInteraction;
@@ -63,5 +65,27 @@ public class MainActivity extends AppCompatActivity implements HasSupportFragmen
         data.putInt(StepVideoPlayerFragment.RECIPE_ID_KEY, Integer.valueOf(recipeId));
         data.putInt(StepVideoPlayerFragment.STEP_ID_KEY, Integer.valueOf(stepId));
         navController.navigate(R.id.destination_player, data);
+    }
+
+    @Override
+    public void onDataLoaded(String fragment) {
+        RecipesIntentService.startActionUpdateRecipes(this);
+        navigateToRecipeFromIntent();
+    }
+
+    private void navigateToRecipeFromIntent() {
+        int recipeId = getIntent().getIntExtra(RecipeDetailFragment.RECIPE_ID_KEY, -1);
+        if (recipeId != -1) {
+            Bundle data = new Bundle();
+            data.putInt(RecipeDetailFragment.RECIPE_ID_KEY, recipeId);
+            navController.navigate(R.id.action_fragment_detail, data);
+        }
+        getIntent().removeExtra(RecipeDetailFragment.RECIPE_ID_KEY);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        navigateToRecipeFromIntent();
     }
 }
