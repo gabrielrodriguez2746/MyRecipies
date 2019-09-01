@@ -10,6 +10,8 @@ import com.myrecipes.data.models.Recipe;
 import java.util.List;
 
 import io.reactivex.Completable;
+import io.reactivex.Maybe;
+import io.reactivex.Observable;
 import io.reactivex.Single;
 
 @Dao
@@ -23,5 +25,8 @@ public abstract class RecipesDao {
 
     @Query("SELECT * FROM recipe")
     public abstract Single<List<Recipe>> getRecipes();
+
+    @Query("SELECT * FROM recipe")
+    public abstract Maybe<List<Recipe>> getRecipesMaybe();
 
 }

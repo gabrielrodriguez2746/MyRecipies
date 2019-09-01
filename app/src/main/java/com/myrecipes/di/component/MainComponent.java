@@ -2,6 +2,7 @@ package com.myrecipes.di.component;
 
 import com.myrecipes.RecipesApplication;
 import com.myrecipes.di.modules.app.AppActivityBuilder;
+import com.myrecipes.di.modules.app.AppServiceBuilder;
 import com.myrecipes.di.modules.app.AppConfigurationModule;
 import com.myrecipes.di.modules.app.AppDataBaseModule;
 import com.myrecipes.di.modules.app.AppModule;
@@ -22,6 +23,7 @@ import dagger.android.support.AndroidSupportInjectionModule;
         AndroidSupportInjectionModule.class,
         ApiModule.class,
         AppActivityBuilder.class,
+        AppServiceBuilder.class,
         AppConfigurationModule.class,
         AppDataBaseModule.class,
         AppModule.class,
