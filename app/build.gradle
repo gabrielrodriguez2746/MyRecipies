@@ -11,6 +11,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0.0"
+        testInstrumentationRunner "com.myrecipes.MyTestRunner"
     }
     buildTypes {
         release {
@@ -70,6 +71,12 @@ dependencies {
     implementation "com.google.android.exoplayer:exoplayer:$rootProject.ext.exoPlayer"
     implementation "org.jsoup:jsoup:$rootProject.ext.jSoup"
     implementation "com.android.support:support-media-compat:$rootProject.ext.mediaCompat"
+
+    // Espresso
+    androidTestImplementation "androidx.test.ext:junit:1.1.1"
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0-beta01'
+    androidTestImplementation 'androidx.test:rules:1.3.0-alpha02'
+    androidTestImplementation 'com.squareup.rx.idler:rx2-idler:0.9.1'
 
 
 }
