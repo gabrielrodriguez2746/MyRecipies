@@ -10,6 +10,7 @@ import com.myrecipes.data.models.Ingredient;
 import java.util.List;
 
 import io.reactivex.Completable;
+import io.reactivex.Maybe;
 import io.reactivex.Single;
 
 @Dao

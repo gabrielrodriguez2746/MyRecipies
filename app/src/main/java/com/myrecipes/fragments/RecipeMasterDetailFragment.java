@@ -1,7 +1,6 @@
 package com.myrecipes.fragments;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,21 +10,17 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
-import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.myrecipes.R;
 import com.myrecipes.data.models.Ingredient;
 import com.myrecipes.databinding.FragmentMasterRecipeDetailBinding;
-import com.myrecipes.databinding.FragmentRecipeDetailBinding;
 import com.myrecipes.helpers.MyExoPlayerEventListener;
 import com.myrecipes.helpers.StepsExoPlayerHandler;
-import com.myrecipes.listeners.OnDetailFragmentInteraction;
 import com.myrecipes.utils.ListUtils;
-import com.myrecipes.viewmodels.detail.RecipeDetailViewModel;
 import com.myrecipes.viewmodels.detail.RecipeMasterDetailViewModel;
 import com.myrecipes.widget.StepWidget;
 
@@ -37,9 +32,7 @@ import javax.inject.Inject;
 import dagger.android.support.AndroidSupportInjection;
 import timber.log.Timber;
 
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-
-public class RecipeMasterDetailFragment extends Fragment {
+public class RecipeMasterDetailFragment extends ExoPlayerRestoreStateFragment {
 
     public static String RECIPE_ID_KEY = "recipe_id";
 
@@ -49,8 +42,6 @@ public class RecipeMasterDetailFragment extends Fragment {
     private Toast toast = null;
     private String bulletString;
     private int recipeId;
-    private StepsExoPlayerHandler playerHandler;
-    private MyExoPlayerEventListener playerListener;
 
     @Inject
     ViewModelProvider.Factory factory;
@@ -69,7 +60,9 @@ public class RecipeMasterDetailFragment extends Fragment {
             bulletString = getString(R.string.app_copy_bullet);
             if (playerHandler == null) {
                 Timber.tag("Gabriel").d("player was null");
-                setupPlayer();
+                setPlayerWindowPosition(savedInstanceState);
+                setPlayerSeekerPosition(savedInstanceState);
+                setupPlayer(getPlayerIsPlayWhenReady(savedInstanceState));
             }
         }
         return binding != null ? binding.getRoot() : super.onCreateView(inflater, container, savedInstanceState);
@@ -99,8 +92,15 @@ public class RecipeMasterDetailFragment extends Fragment {
                 // Gabriel This should be made by activity
                 binding.setSteps(new StepWidget(steps, this::onRecipeStepClicked));
                 playerHandler.buildMediaSource(steps);
+                processStepFromExtras();
             }
         });
+    }
+
+    private void processStepFromExtras() {
+        if (getSavedWindowsPosition() != -1) {
+            playerHandler.setPosition(getSavedWindowsPosition(), getSavedSeekerPosition());
+        }
     }
 
     private void processSelectedStep() {
@@ -148,30 +148,17 @@ public class RecipeMasterDetailFragment extends Fragment {
                 .getSupportActionBar()).setTitle(recipeName);
     }
 
-    private void setupPlayer() {
+    private void setupPlayer(boolean playerIsPlayWhenReady) {
         Context context = binding.getRoot().getContext();
-        playerHandler = new StepsExoPlayerHandler(binding.pvRecipe);
-        playerListener = new MyExoPlayerEventListener(context, StepVideoPlayerFragment.class.getSimpleName(),
-                playerHandler.getPlayer(), () -> viewModel.getRecipeStepInformation(recipeId, playerHandler.getMediaId()));
+        Lifecycle lifecycle = getViewLifecycleOwner().getLifecycle();
+        playerHandler = new StepsExoPlayerHandler(playerIsPlayWhenReady, binding.pvRecipe);
+        MyExoPlayerEventListener playerListener = new MyExoPlayerEventListener(
+                context, StepVideoPlayerFragment.class.getSimpleName(),
+                () -> viewModel.getRecipeStepInformation(recipeId, playerHandler.getMediaId()),
+                () -> playerHandler.getPlayer());
+        lifecycle.addObserver(playerHandler);
+        lifecycle.addObserver(playerListener);
         playerHandler.addListener(playerListener);
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        playerHandler.pausePlayer();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        playerHandler.resumePlayer();
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        playerHandler.releasePlayer();
-        playerListener.onDestroy();
-    }
 }

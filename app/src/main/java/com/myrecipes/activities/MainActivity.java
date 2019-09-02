@@ -1,6 +1,5 @@
 package com.myrecipes.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -11,8 +10,9 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
 
+import com.myrecipes.IngredientsIntentService;
 import com.myrecipes.R;
-import com.myrecipes.RecipesIntentService;
+import com.myrecipes.data.preference.LastRecipePreference;
 import com.myrecipes.fragments.RecipeDetailFragment;
 import com.myrecipes.fragments.StepVideoPlayerFragment;
 import com.myrecipes.listeners.OnDetailFragmentInteraction;
@@ -27,6 +27,9 @@ import dagger.android.support.HasSupportFragmentInjector;
 
 public class MainActivity extends AppCompatActivity implements HasSupportFragmentInjector,
         OnFragmentInteraction, OnDetailFragmentInteraction {
+
+    @Inject
+    LastRecipePreference lastRecipePreference;
 
     @Inject
     DispatchingAndroidInjector<Fragment> dispatchingAndroidInjector;
@@ -54,9 +57,8 @@ public class MainActivity extends AppCompatActivity implements HasSupportFragmen
 
     @Override
     public void onItemClicked(String fragment, String id) {
-        Bundle data = new Bundle();
-        data.putInt(RecipeDetailFragment.RECIPE_ID_KEY, Integer.valueOf(id));
-        navController.navigate(R.id.action_fragment_detail, data);
+        int recipeId = Integer.valueOf(id);
+        navigateToDetail(recipeId);
     }
 
     @Override
@@ -67,25 +69,11 @@ public class MainActivity extends AppCompatActivity implements HasSupportFragmen
         navController.navigate(R.id.destination_player, data);
     }
 
-    @Override
-    public void onDataLoaded(String fragment) {
-        RecipesIntentService.startActionUpdateRecipes(this);
-        navigateToRecipeFromIntent();
-    }
-
-    private void navigateToRecipeFromIntent() {
-        int recipeId = getIntent().getIntExtra(RecipeDetailFragment.RECIPE_ID_KEY, -1);
-        if (recipeId != -1) {
-            Bundle data = new Bundle();
-            data.putInt(RecipeDetailFragment.RECIPE_ID_KEY, recipeId);
-            navController.navigate(R.id.action_fragment_detail, data);
-        }
-        getIntent().removeExtra(RecipeDetailFragment.RECIPE_ID_KEY);
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        navigateToRecipeFromIntent();
+    private void navigateToDetail(int recipeId) {
+        Bundle data = new Bundle();
+        data.putInt(RecipeDetailFragment.RECIPE_ID_KEY, recipeId);
+        lastRecipePreference.setLastRecipeId(recipeId);
+        IngredientsIntentService.startActionUpdateRecipes(this);
+        navController.navigate(R.id.action_fragment_detail, data);
     }
 }

@@ -94,8 +94,6 @@ public class RecipesListFragment extends Fragment implements RecipesListAdapter.
 
     private void processItems(List<Recipe> recipes) {
         Timber.d("recipes at fragment :: %s", recipes.toString());
-        ((OnFragmentInteraction) Objects.requireNonNull(getActivity()))
-                .onDataLoaded(viewModel.getClass().getSimpleName());
         adapter.submitList(recipes);
     }
 
