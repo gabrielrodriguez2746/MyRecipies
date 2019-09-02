@@ -1,5 +1,5 @@
 package com.myrecipes.helpers;
 
-interface GenericSupplier<T> {
+public interface GenericSupplier<T> {
     T invoke();
 }

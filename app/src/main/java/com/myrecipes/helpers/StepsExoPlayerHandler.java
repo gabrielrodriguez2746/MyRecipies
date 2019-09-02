@@ -2,9 +2,12 @@ package com.myrecipes.helpers;
 
 import android.content.Context;
 import android.net.Uri;
-import android.support.v4.media.session.MediaSessionCompat;
-import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.SparseIntArray;
+
+import androidx.annotation.Nullable;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.OnLifecycleEvent;
 
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
@@ -15,14 +18,10 @@ import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelection;
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.PlayerView;
-import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultAllocator;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
@@ -35,35 +34,40 @@ import com.myrecipes.utils.VideoPlayerConfig;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 
-public class StepsExoPlayerHandler {
+import timber.log.Timber;
 
+public class StepsExoPlayerHandler implements LifecycleObserver {
+
+    private int savedWindowsPosition = -1;
+    private long savedSeekerPosition = -1L;
+    private boolean playWhenReady;
+
+    @Nullable
+    private Player.EventListener listener;
+    @Nullable
     private SimpleExoPlayer player;
-    private MediaSessionCompat mediaSession;
-    private PlaybackStateCompat.Builder stateBuilder;
+    @Nullable
+    private ConcatenatingMediaSource concatenatingMediaSource;
+
+    private LoadControl loadControl = new DefaultLoadControl(
+            new DefaultAllocator(true, 16),
+            VideoPlayerConfig.MIN_BUFFER_DURATION,
+            VideoPlayerConfig.MAX_BUFFER_DURATION,
+            VideoPlayerConfig.MIN_PLAYBACK_START_BUFFER,
+            VideoPlayerConfig.MIN_PLAYBACK_RESUME_BUFFER, -1, true);
+    private TrackSelector trackSelector =
+            new DefaultTrackSelector(new AdaptiveTrackSelection.Factory(new DefaultBandwidthMeter()));
 
     private HashMap<String, Integer> mediaIndexMap = new HashMap<>();
     private SparseIntArray mediaIdIndexMap = new SparseIntArray();
 
     private PlayerView playerView;
 
-    public StepsExoPlayerHandler(PlayerView playerView) {
+    public StepsExoPlayerHandler(boolean playWhenReady, PlayerView playerView) {
+        this.playWhenReady = playWhenReady;
         this.playerView = playerView;
-        LoadControl loadControl = new DefaultLoadControl(
-                new DefaultAllocator(true, 16),
-                VideoPlayerConfig.MIN_BUFFER_DURATION,
-                VideoPlayerConfig.MAX_BUFFER_DURATION,
-                VideoPlayerConfig.MIN_PLAYBACK_START_BUFFER,
-                VideoPlayerConfig.MIN_PLAYBACK_RESUME_BUFFER, -1, true);
-        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-        TrackSelection.Factory videoTrackSelectionFactory =
-                new AdaptiveTrackSelection.Factory(bandwidthMeter);
-        TrackSelector trackSelector =
-                new DefaultTrackSelector(videoTrackSelectionFactory);
-        player = ExoPlayerFactory.newSimpleInstance(new DefaultRenderersFactory(playerView.getContext()),
-                trackSelector, loadControl);
-        playerView.setPlayer(player);
+
     }
 
     public void buildMediaSource(List<Step> videoSteps) {
@@ -87,20 +91,20 @@ public class StepsExoPlayerHandler {
         }
 
         MediaSource[] sourcesArray = new MediaSource[sources.size()];
-        ConcatenatingMediaSource concatenatingMediaSource = new ConcatenatingMediaSource(
+        concatenatingMediaSource = new ConcatenatingMediaSource(
                 sources.toArray(sourcesArray)
         );
-
-        player.prepare(concatenatingMediaSource);
-        player.setPlayWhenReady(true);
+        preparePlayer();
     }
 
     public void onStepChanged(Step step) {
-        if (mediaIdIndexMap.get(player.getCurrentWindowIndex()) != step.getId()) {
+        int mediaId = player != null ? mediaIdIndexMap.get(player.getCurrentWindowIndex()) : -1;
+        if (mediaId != step.getId()) {
             String video = step.getVideo();
             if (mediaIndexMap.containsKey(video)) {
                 Integer videoIndex = mediaIndexMap.get(video);
                 if (videoIndex != null) {
+                    Timber.d("Moving to extra clicked position %s", videoIndex);
                     player.seekTo(videoIndex, 0);
                 }
             }
@@ -108,35 +112,94 @@ public class StepsExoPlayerHandler {
     }
 
     public int getMediaId() {
-        return mediaIdIndexMap.get(player.getCurrentWindowIndex());
+        return player != null ? mediaIdIndexMap.get(player.getCurrentWindowIndex()) : -1;
     }
 
     public void addListener(Player.EventListener listener) {
-        player.addListener(listener);
+        this.listener = listener;
     }
 
+    @Nullable
     public SimpleExoPlayer getPlayer() {
         return player;
     }
 
-    public void releasePlayer() {
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    public void onStart() {
+        Timber.d("initializing player");
+        initializePlayer();
+        preparePlayer();
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+    public void onResume() {
+        Timber.d("resume player");
+        resumePlayer();
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+    public void onPause() {
+        Timber.d("pause player");
+        pausePlayer();
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    public void onStop() {
+        Timber.d("stop player");
+        releasePlayer();
+    }
+
+    private void releasePlayer() {
         if (player != null) {
             player.release();
             player = null;
         }
     }
 
-    public void resumePlayer() {
+    private void resumePlayer() {
         if (player != null) {
-            player.setPlayWhenReady(true);
-            player.getPlaybackState();
+            player.setPlayWhenReady(playWhenReady);
         }
     }
 
-    public void pausePlayer() {
+    private void preparePlayer() {
+        if (player != null && concatenatingMediaSource != null) {
+            player.prepare(concatenatingMediaSource);
+        }
+    }
+
+    private void pausePlayer() {
         if (player != null) {
-            player.setPlayWhenReady(false);
-            player.getPlaybackState();
+            playWhenReady = player.getPlayWhenReady();
+            savedWindowsPosition = player.getCurrentWindowIndex();
+            savedSeekerPosition = Math.max(0, player.getCurrentPosition());
+        }
+    }
+
+    public int getSavedWindowsPosition() {
+        return savedWindowsPosition;
+    }
+
+    public long getSavedSeekerPosition() {
+        return savedSeekerPosition;
+    }
+
+    public boolean isPlayWhenReady() {
+        return playWhenReady;
+    }
+
+    private void initializePlayer() {
+        player = ExoPlayerFactory.newSimpleInstance(new DefaultRenderersFactory(playerView.getContext()),
+                trackSelector, loadControl);
+        playerView.setPlayer(player);
+        player.addListener(listener);
+    }
+
+    public void setPosition(int savedWindowsPosition, long savedSeekerPosition) {
+        this.savedWindowsPosition = savedWindowsPosition;
+        this.savedSeekerPosition = savedSeekerPosition;
+        if (player != null) {
+            player.seekTo(savedWindowsPosition, savedSeekerPosition);
         }
     }
 }

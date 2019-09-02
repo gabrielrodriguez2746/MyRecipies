@@ -13,6 +13,6 @@ public abstract class RecipesRepositoryModule {
 
     @Binds
     @Singleton
-    public abstract RecipesRepository bindPopularMoviesRepository(MyRecipesRepository repository);
+    public abstract RecipesRepository bindRecipesRepository(MyRecipesRepository repository);
 
 }

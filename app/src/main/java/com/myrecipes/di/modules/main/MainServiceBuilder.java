@@ -1,6 +1,6 @@
 package com.myrecipes.di.modules.main;
 
-import com.myrecipes.RecipesIntentService;
+import com.myrecipes.IngredientsIntentService;
 
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;
@@ -9,6 +9,6 @@ import dagger.android.ContributesAndroidInjector;
 public abstract class MainServiceBuilder {
 
     @ContributesAndroidInjector
-    abstract RecipesIntentService bindRecipesIntentService();
+    abstract IngredientsIntentService bindRecipesIntentService();
 
 }

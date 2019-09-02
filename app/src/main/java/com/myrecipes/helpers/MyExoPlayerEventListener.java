@@ -4,6 +4,10 @@ import android.content.Context;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.OnLifecycleEvent;
+
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
@@ -12,19 +16,20 @@ import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 
-public class MyExoPlayerEventListener implements Player.EventListener {
+public class MyExoPlayerEventListener implements Player.EventListener, LifecycleObserver {
 
     private MediaSessionCompat mediaSession;
     private PlaybackStateCompat.Builder stateBuilder;
 
-    private SimpleExoPlayer player;
     private VoidSupplier onTrackChange;
+    private GenericSupplier<SimpleExoPlayer> playerSupplier;
 
     public MyExoPlayerEventListener(
-            Context context, String name, SimpleExoPlayer player, VoidSupplier onTrackChange
+            Context context, String name, VoidSupplier onTrackChange,
+            GenericSupplier<SimpleExoPlayer> playerSupplier
     ) {
-        this.player = player;
         this.onTrackChange = onTrackChange;
+        this.playerSupplier = playerSupplier;
         mediaSession = new MediaSessionCompat(context, name);
 
         mediaSession.setFlags(
@@ -46,13 +51,16 @@ public class MyExoPlayerEventListener implements Player.EventListener {
 
         // MySessionCallback has methods that handle callbacks from a media controller.
         mediaSession.setCallback(new MySessionCallback());
-
-        // Start the Media Session since the activity is active.
-        mediaSession.setActive(true);
     }
 
-    public void onDestroy() {
+    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+    public void onPause() {
         mediaSession.setActive(false);
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+    public void onResume() {
+        mediaSession.setActive(true);
     }
 
     @Override
@@ -72,12 +80,15 @@ public class MyExoPlayerEventListener implements Player.EventListener {
 
     @Override
     public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-        if ((playbackState == Player.STATE_READY) && playWhenReady) {
-            stateBuilder.setState(PlaybackStateCompat.STATE_PLAYING,
-                    player.getCurrentPosition(), 1f);
-        } else if ((playbackState == Player.STATE_READY)) {
-            stateBuilder.setState(PlaybackStateCompat.STATE_PAUSED,
-                    player.getCurrentPosition(), 1f);
+        SimpleExoPlayer player = playerSupplier.invoke();
+        if (player != null) {
+            if ((playbackState == Player.STATE_READY) && playWhenReady) {
+                stateBuilder.setState(PlaybackStateCompat.STATE_PLAYING,
+                        player.getCurrentPosition(), 1f);
+            } else if ((playbackState == Player.STATE_READY)) {
+                stateBuilder.setState(PlaybackStateCompat.STATE_PAUSED,
+                        player.getCurrentPosition(), 1f);
+            }
         }
     }
 
@@ -114,17 +125,26 @@ public class MyExoPlayerEventListener implements Player.EventListener {
     private class MySessionCallback extends MediaSessionCompat.Callback {
         @Override
         public void onPlay() {
-            player.setPlayWhenReady(true);
+            SimpleExoPlayer player = playerSupplier.invoke();
+            if (player != null) {
+                player.setPlayWhenReady(true);
+            }
         }
 
         @Override
         public void onPause() {
-            player.setPlayWhenReady(false);
+            SimpleExoPlayer player = playerSupplier.invoke();
+            if (player != null) {
+                player.setPlayWhenReady(false);
+            }
         }
 
         @Override
         public void onSkipToPrevious() {
-            player.seekTo(0);
+            SimpleExoPlayer player = playerSupplier.invoke();
+            if (player != null) {
+                player.seekTo(0);
+            }
         }
     }
 }

@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.databinding.DataBindingUtil;
-import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 
@@ -29,7 +29,7 @@ import timber.log.Timber;
 
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 
-public class StepVideoPlayerFragment extends Fragment {
+public class StepVideoPlayerFragment extends ExoPlayerRestoreStateFragment {
 
     public static String RECIPE_ID_KEY = "recipe_id";
     public static String STEP_ID_KEY = "step_id";
@@ -38,8 +38,6 @@ public class StepVideoPlayerFragment extends Fragment {
     private RecipeStepViewModel viewModel;
 
     private int recipeId;
-    private StepsExoPlayerHandler playerHandler;
-    private MyExoPlayerEventListener playerListener;
 
     @Inject
     ViewModelProvider.Factory factory;
@@ -64,7 +62,9 @@ public class StepVideoPlayerFragment extends Fragment {
             }
             if (playerHandler == null) {
                 Timber.tag("Gabriel").d("player was null");
-                setupPlayer();
+                setPlayerWindowPosition(savedInstanceState);
+                setPlayerSeekerPosition(savedInstanceState);
+                setupPlayer(getPlayerIsPlayWhenReady(savedInstanceState));
             }
         }
         return binding != null ? binding.getRoot() : super.onCreateView(inflater, container, savedInstanceState);
@@ -106,36 +106,24 @@ public class StepVideoPlayerFragment extends Fragment {
 
     private void processStepFromExtras() {
         Bundle arguments = Objects.requireNonNull(getArguments());
-        if (arguments.containsKey(STEP_ID_KEY)) {
+        if (getSavedWindowsPosition() != -1) {
+            playerHandler.setPosition(getSavedWindowsPosition(), getSavedSeekerPosition());
+        } else if (arguments.containsKey(STEP_ID_KEY)) {
             viewModel.getRecipeStepInformation(recipeId, arguments.getInt(STEP_ID_KEY));
         }
     }
 
-    private void setupPlayer() {
+    private void setupPlayer(boolean playerIsPlayWhenReady) {
         Context context = binding.getRoot().getContext();
-        playerHandler = new StepsExoPlayerHandler(binding.pvRecipe);
-        playerListener = new MyExoPlayerEventListener(context, StepVideoPlayerFragment.class.getSimpleName(),
-                playerHandler.getPlayer(), () -> viewModel.getRecipeStepInformation(recipeId, playerHandler.getMediaId()));
+        Lifecycle lifecycle = getViewLifecycleOwner().getLifecycle();
+        playerHandler = new StepsExoPlayerHandler(playerIsPlayWhenReady, binding.pvRecipe);
+        MyExoPlayerEventListener playerListener = new MyExoPlayerEventListener(
+                context, StepVideoPlayerFragment.class.getSimpleName(),
+                () -> viewModel.getRecipeStepInformation(recipeId, playerHandler.getMediaId()),
+                () -> playerHandler.getPlayer());
+        lifecycle.addObserver(playerHandler);
+        lifecycle.addObserver(playerListener);
         playerHandler.addListener(playerListener);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        playerHandler.pausePlayer();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        playerHandler.resumePlayer();
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        playerHandler.releasePlayer();
-        playerListener.onDestroy();
     }
 
 }

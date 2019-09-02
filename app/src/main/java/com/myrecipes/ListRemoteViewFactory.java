@@ -1,13 +1,10 @@
 package com.myrecipes;
 
 import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
-import com.myrecipes.data.models.Recipe;
-import com.myrecipes.fragments.RecipeDetailFragment;
+import com.myrecipes.data.models.Ingredient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +13,7 @@ import timber.log.Timber;
 
 public class ListRemoteViewFactory implements RemoteViewsService.RemoteViewsFactory {
 
-    private static List<Recipe> items = new ArrayList<>();
+    private static List<Ingredient> items = new ArrayList<>();
     private Context context;
 
     public ListRemoteViewFactory(Context context) {
@@ -45,14 +42,9 @@ public class ListRemoteViewFactory implements RemoteViewsService.RemoteViewsFact
 
     @Override
     public RemoteViews getViewAt(int position) {
-        Recipe recipe = items.get(position);
+        Ingredient ingredient = items.get(position);
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.item_recipe_widget);
-        views.setTextViewText(R.id.tv_recipe, recipe.getName());
-        Bundle extras = new Bundle();
-        extras.putInt(RecipeDetailFragment.RECIPE_ID_KEY, recipe.getId());
-        Intent fillInIntent = new Intent();
-        fillInIntent.putExtras(extras);
-        views.setOnClickFillInIntent(R.id.tv_recipe, fillInIntent);
+        views.setTextViewText(R.id.tv_recipe, ingredient.getName());
         return views;
     }
 
@@ -80,7 +72,7 @@ public class ListRemoteViewFactory implements RemoteViewsService.RemoteViewsFact
         return true;
     }
 
-    public static void setItems(List<Recipe> items) {
+    public static void setItems(List<Ingredient> items) {
         ListRemoteViewFactory.items = items;
 
     }

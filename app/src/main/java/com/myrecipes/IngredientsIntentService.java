@@ -14,10 +14,11 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.util.Pair;
 
-import com.myrecipes.data.dao.RecipesDao;
+import com.myrecipes.data.models.Ingredient;
 import com.myrecipes.data.models.Recipe;
-import com.myrecipes.respositories.RecipesRepository;
+import com.myrecipes.respositories.IngredientsRepository;
 
 import java.util.Collections;
 import java.util.List;
@@ -27,25 +28,23 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import timber.log.Timber;
 
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static androidx.core.app.NotificationCompat.CATEGORY_SERVICE;
 import static androidx.core.app.NotificationCompat.PRIORITY_HIGH;
 
-public class RecipesIntentService extends IntentService {
+public class IngredientsIntentService extends IntentService {
 
     private Disposable disposable;
 
     @Inject
-    RecipesDao recipesDao;
-
-    @Inject
-    RecipesRepository repository;
+    IngredientsRepository repository;
 
 
-    public RecipesIntentService() {
-        super("RecipesIntentService");
+    public IngredientsIntentService() {
+        super("IngredientsIntentService");
     }
 
     @Override
@@ -70,27 +69,26 @@ public class RecipesIntentService extends IntentService {
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
         Timber.d("Receiving intent");
-        disposable = recipesDao.getRecipesMaybe()
-                .toSingle()
-                .onErrorResumeNext(throwable -> repository.getRecipes())
+        disposable = repository.getLastRecipeIngredients()
+                .doOnSuccess(this::updateWidgets)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                        recipes -> {
-                            updateWidgets(recipes != null ? recipes : Collections.emptyList());
+                        recipe -> {
                         }, // Gabriel Improve this
                         Throwable::printStackTrace);// Gabriel Notify
     }
 
-    private void updateWidgets(List<Recipe> recipes) {
+    private void updateWidgets(Recipe recipe) {
+        Timber.d("Updating with ingredients :: %s", recipe);
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
         int[] appWidgetIds = appWidgetManager.getAppWidgetIds(
                 new ComponentName(this, IngredientsWidgetProvider.class)
         );
-        IngredientsWidgetProvider.updateAppWidgets(this, appWidgetManager, recipes, appWidgetIds);
+        IngredientsWidgetProvider.updateAppWidgets(this, appWidgetManager, recipe, appWidgetIds);
     }
 
     public static void startActionUpdateRecipes(Context context) {
-        Intent intent = new Intent(context, RecipesIntentService.class);
+        Intent intent = new Intent(context, IngredientsIntentService.class);
         ContextCompat.startForegroundService(context, intent);
     }
 
@@ -98,7 +96,7 @@ public class RecipesIntentService extends IntentService {
     private void startForeground() {
 
         String NOTIFICATION_CHANNEL_ID = "com.myrecipes";
-        String channelName = "RecipesIntentService";
+        String channelName = "IngredientsIntentService";
         NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, IMPORTANCE_MIN);
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         manager.createNotificationChannel(channel);

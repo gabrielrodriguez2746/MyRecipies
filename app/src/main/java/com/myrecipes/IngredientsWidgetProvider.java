@@ -10,7 +10,7 @@ import android.widget.RemoteViews;
 import com.myrecipes.activities.MainActivity;
 import com.myrecipes.data.models.Recipe;
 
-import java.util.List;
+import timber.log.Timber;
 
 /**
  * Implementation of App Widget functionality.
@@ -18,10 +18,11 @@ import java.util.List;
 public class IngredientsWidgetProvider extends AppWidgetProvider {
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-                                List<Recipe> recipes, int appWidgetId) {
+                                Recipe recipe, int appWidgetId) {
         // Construct the RemoteViews object
         RemoteViews views;
-        if (recipes.isEmpty()) {
+        Timber.d("updating widget :: %s", recipe.toString());
+        if (recipe.getIngredients().isEmpty()) {
             views = new RemoteViews(context.getPackageName(), R.layout.item_recipes_empty_widget);
             Intent intent = new Intent(context, MainActivity.class);
             PendingIntent pendingIntent = PendingIntent.getActivity(context, 0,
@@ -29,35 +30,26 @@ public class IngredientsWidgetProvider extends AppWidgetProvider {
             views.setOnClickPendingIntent(R.id.iv_icon, pendingIntent);
         } else {
             views = new RemoteViews(context.getPackageName(), R.layout.item_recipes_widget);
-            ListRemoteViewFactory.setItems(recipes);
+            ListRemoteViewFactory.setItems(recipe.getIngredients());
             Intent intent = new Intent(context, ListWidgetsService.class);
+            views.setTextViewText(R.id.tv_title, recipe.getName());
             views.setRemoteAdapter(R.id.lv_recipes, intent);
 
-            Intent appIntent = new Intent(context, MainActivity.class);
-            PendingIntent appPendingIntent = PendingIntent.getActivity(context, 0, appIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            views.setPendingIntentTemplate(R.id.lv_recipes, appPendingIntent);
         }
 
-//        views.setTextViewText(R.id.tv_loading, recipes.toString());
-
-//        Intent intent = new Intent(context, MainActivity.class);
-//        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
-//        views.setPendingIntentTemplate(R.id.iv_home, pendingIntent);
-
-        // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views);
     }
 
     public static void updateAppWidgets(Context context, AppWidgetManager appWidgetManager,
-                                        List<Recipe> recipes, int[] appWidgetIds) {
+                                        Recipe recipe, int[] appWidgetIds) {
         for (int appWidgetId : appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, recipes, appWidgetId);
+            updateAppWidget(context, appWidgetManager, recipe, appWidgetId);
         }
     }
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        RecipesIntentService.startActionUpdateRecipes(context);
+        IngredientsIntentService.startActionUpdateRecipes(context);
     }
 
     @Override
