@@ -10,7 +10,8 @@ public final class MyTestRunner extends AndroidJUnitRunner {
   @Override public void onStart() {
     RxJavaPlugins.setInitComputationSchedulerHandler(
         Rx2Idler.create("RxJava 2.x Computation Scheduler"));
-    // etc...
+    RxJavaPlugins.setInitIoSchedulerHandler(
+            Rx2Idler.create("RxJava 2.x IO Scheduler"));
     super.onStart();
   }
 }

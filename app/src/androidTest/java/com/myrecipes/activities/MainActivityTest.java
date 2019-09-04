@@ -37,22 +37,11 @@ public class MainActivityTest {
     @Test
     public void validateE2EWorkflow() {
         Espresso.onView(withText("My Recipes")).check(matches(isDisplayed()));
-        waitForService(500);
         Espresso.onView(withText("NUTELLA PIE")).check(matches(isDisplayed()));
         Espresso.onView(withText("NUTELLA PIE")).perform(click());
-        waitForService(400);
         Espresso.onView(withId(R.id.tv_ingredients)).check(matches(not(withText(""))));
         Espresso.onView(nthChildOf(withId(R.id.ll_steps), 0)).perform(click());
-        waitForService(400);
         Espresso.onView(withId(R.id.pvRecipe)).check(matches(isDisplayed()));
-    }
-
-    private void waitForService(int time) {
-        try {
-            Thread.sleep(time);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     @After
@@ -64,7 +53,7 @@ public class MainActivityTest {
         return new TypeSafeMatcher<View>() {
             @Override
             public void describeTo(Description description) {
-                description.appendText("with "+childPosition+" child view of type parentMatcher");
+                description.appendText("with " + childPosition + " child view of type parentMatcher");
             }
 
             @Override
